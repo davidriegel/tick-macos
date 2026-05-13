@@ -11,7 +11,7 @@ import SwiftUI
 struct TickApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TokenListView()
         }
     }
 }
