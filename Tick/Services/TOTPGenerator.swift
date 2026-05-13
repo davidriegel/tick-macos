@@ -23,7 +23,13 @@ enum TOTPGenerator {
         return (period - elapsed)
     }
     
-    // MARK: -Private
+    public static func progress(for token: OTPToken, at date: Date = Date()) -> Double {
+        let period = Double(token.period)
+        let elapsed = date.timeIntervalSince1970.truncatingRemainder(dividingBy: period)
+        return 1.0 - elapsed / period
+    }
+    
+    // MARK: - Private
     
     fileprivate static func generateHOTP(secret: Data, counter: UInt64, algorithm: OTPAlgorithm, digits: Int) -> String {
         var counterBE = counter.bigEndian
@@ -49,10 +55,6 @@ enum TOTPGenerator {
         let b3 = UInt32(hash[offset + 3])
         
         let code = (b0 << 24) | (b1 << 16) | (b2 << 8) | b3
-        
-        print(code)
-        
-        print(code % UInt32(pow(10.0, Double(digits))))
         
         let otp = code % UInt32(pow(10.0, Double(digits)))
         var otpCode = String(otp)
