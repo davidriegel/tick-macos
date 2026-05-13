@@ -8,9 +8,11 @@
 import SwiftUI
 
 struct TokenListView: View {
+    let tokenStore = TokenStore()
+    
     var body: some View {
-        List() {
-            TokenRowView(token: OTPToken(issuer: "Github", account: "davidriegel", secret: Data()))
+        List(tokenStore.tokens) { token in
+            TokenRowView(token: token)
         }
     }
 }
