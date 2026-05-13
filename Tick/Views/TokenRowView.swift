@@ -11,32 +11,38 @@ struct TokenRowView: View {
     let token: OTPToken
     
     var body: some View {
-        HStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(token.issuer)
-                    .font(.headline)
-                Text(token.account)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
+        TimelineView(.periodic(from: .now, by: 1.0)) { context in
+            let otpCode = TOTPGenerator.generate(for: token, at: context.date)
+            let otpProgress = TOTPGenerator.progress(for: token, at: context.date)
+            let otpSeconds = TOTPGenerator.secondsRemaining(for: token, at: context.date)
             
-            Spacer()
-            
-            Text("123 456")
-                .font(.system(.title2,design: .monospaced, weight: .medium))
-                .monospacedDigit()
-                .contentTransition(.numericText())
-                .animation(.default, value: "123 456")
-            CircularProgressBarView(progress: 0.25)
-                .frame(width: 32, height: 32)
-                .overlay {
-                    Text("10")
-                        .font(.caption2)
-                        .monospacedDigit()
+            HStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(token.issuer)
+                        .font(.headline)
+                    Text(token.account)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
+                
+                Spacer()
+                
+                Text(otpCode)
+                    .font(.system(.title2,design: .monospaced, weight: .medium))
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
+                    .animation(.default, value: otpCode)
+                CircularProgressBarView(progress: otpProgress)
+                    .frame(width: 32, height: 32)
+                    .overlay {
+                        Text("\(otpSeconds)")
+                            .font(.caption2)
+                            .monospacedDigit()
+                    }
+            }
+            .padding(.vertical, 4)
+            .contentShape(Rectangle())
         }
-        .padding(.vertical, 4)
-        .contentShape(Rectangle())
     }
 }
 
