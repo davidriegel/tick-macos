@@ -27,7 +27,7 @@ struct TokenRowView: View {
                 
                 Spacer()
                 
-                Text(otpCode)
+                Text(formatCode(otpCode))
                     .font(.system(.title2,design: .monospaced, weight: .medium))
                     .monospacedDigit()
                     .contentTransition(.numericText())
@@ -43,6 +43,12 @@ struct TokenRowView: View {
             .padding(.vertical, 4)
             .contentShape(Rectangle())
         }
+    }
+    
+    private func formatCode(_ code: String) -> String {
+        guard code.count == 6 else { return code }
+        let middleIndex = code.index(code.startIndex, offsetBy: 3)
+        return "\(code[..<middleIndex]) \(code[middleIndex...])"
     }
 }
 
