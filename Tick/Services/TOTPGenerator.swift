@@ -9,10 +9,21 @@ import Foundation
 import CryptoKit
 
 enum TOTPGenerator {
-    static func generate(for token: OTPToken, at date: Date = Date()) -> String {
+    
+    // MARK: - Public
+    
+    public static func generate(for token: OTPToken, at date: Date = Date()) -> String {
         let counter = UInt64(date.timeIntervalSince1970) / UInt64(token.period)
         return generateHOTP(secret: token.secret, counter: counter, algorithm: token.algorithm, digits: token.digits)
     }
+    
+    public static func secondsRemaining(for token: OTPToken, at date: Date = Date()) -> Int {
+        let period = token.period
+        let elapsed = Int(date.timeIntervalSince1970) % period
+        return (period - elapsed)
+    }
+    
+    // MARK: -Private
     
     fileprivate static func generateHOTP(secret: Data, counter: UInt64, algorithm: OTPAlgorithm, digits: Int) -> String {
         var counterBE = counter.bigEndian
