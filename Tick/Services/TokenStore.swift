@@ -16,8 +16,26 @@ final class TokenStore {
     
     
     // MARK: - Initializer
+    
     init() {
-        
+        load()
     }
     
+    // MARK: - Public
+    
+    public func add(_ token: OTPToken) {
+        tokens.append(token)
+        keychain.save(token)
+    }
+    
+    public func remove(_ token: OTPToken) {
+        tokens.removeAll { $0.id == token.id }
+        keychain.delete(id: token.id)
+    }
+    
+    // MARK: - Private
+    
+    private func load() {
+        tokens = keychain.loadAll()
+    }
 }
