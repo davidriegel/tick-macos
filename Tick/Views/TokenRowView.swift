@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TokenRowView: View {
     let token: OTPToken
+    @State private var copied = false
     
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1.0)) { context in
@@ -28,20 +29,48 @@ struct TokenRowView: View {
                 Spacer()
                 
                 Text(formatCode(otpCode))
-                    .font(.system(.title2,design: .monospaced, weight: .medium))
+                    .font(.system(.title2, design: .monospaced, weight: .medium))
                     .monospacedDigit()
                     .contentTransition(.numericText())
                     .animation(.default, value: otpCode)
-                CircularProgressBarView(progress: otpProgress)
-                    .frame(width: 32, height: 32)
-                    .overlay {
-                        Text("\(otpSeconds)")
-                            .font(.caption2)
-                            .monospacedDigit()
-                    }
+                
+                ZStack {
+                    CircularProgressBarView(progress: otpProgress)
+                        .frame(width: 32, height: 32)
+                        .overlay {
+                            Text("\(otpSeconds)")
+                                .font(.caption2)
+                                .monospacedDigit()
+                        }
+                        .opacity(copied ? 0 : 1)
+                    
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.green)
+                        .opacity(copied ? 1 : 0)
+                }
+                .animation(.snappy, value: copied)
             }
             .padding(.vertical, 4)
             .contentShape(Rectangle())
+            .onTapGesture {
+                copyCode(otpCode)
+            }
+        }
+    }
+    
+    private func copyCode(_ code: String) {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(code, forType: .string)
+        
+        withAnimation(.snappy) {
+            copied = true
+        }
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1.2))
+            withAnimation(.snappy) {
+                copied = false
+            }
         }
     }
     
