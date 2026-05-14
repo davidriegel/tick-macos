@@ -46,6 +46,12 @@ final class TokenStore {
         return addedCount
     }
     
+    public func update(_ token: OTPToken) {
+        guard let index = tokens.firstIndex(where: { $0.id == token.id }) else { return }
+        tokens[index] = token
+        keychain.save(token)
+    }
+    
     // MARK: - Private
     
     private func load() {
