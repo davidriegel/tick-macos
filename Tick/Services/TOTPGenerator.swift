@@ -60,7 +60,7 @@ enum TOTPGenerator {
         var otpCode = String(otp)
         
         if otp < UInt32(pow(10.0, Double(digits) - 1)) {
-            otpCode = String(format: "%0\(digits)d", code)
+            otpCode = String(format: "%0\(digits)d", otp)
         }
         
         return otpCode

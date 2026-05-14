@@ -9,7 +9,11 @@ import Foundation
 import Security
 
 final class KeychainService {
-    private let service = "com.davidriegel.Tick"
+    private let service: String
+    
+    init() {
+        self.service = Bundle.main.bundleIdentifier ?? "com.davidriegel.Tick"
+    }
     
     func save(_ token: OTPToken) {
         guard let data = try? JSONEncoder().encode(token) else { return }
@@ -18,12 +22,31 @@ final class KeychainService {
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: token.id.uuidString,
-            kSecValueData as String: data,
-            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+            kSecUseDataProtectionKeychain as String: kCFBooleanTrue!
         ]
         
-        SecItemDelete(query as CFDictionary)
-        SecItemAdd(query as CFDictionary, nil)
+        let attributesToUpdate: [String: Any] = [
+            kSecValueData as String: data
+        ]
+        
+        let updateStatus = SecItemUpdate(query as CFDictionary, attributesToUpdate as CFDictionary)
+        
+        if updateStatus == errSecItemNotFound {
+            var newItem = query
+            newItem[kSecValueData as String] = data
+            newItem[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+            
+            let addStatus = SecItemAdd(newItem as CFDictionary, nil)
+            #if DEBUG
+            if addStatus != errSecSuccess {
+                print("Keychain add failed: \(addStatus)")
+            }
+            #endif
+        } else if updateStatus != errSecSuccess {
+            #if DEBUG
+            print("Keychain update failed: \(updateStatus)")
+            #endif
+        }
     }
     
     func loadAll() -> [OTPToken] {
@@ -31,7 +54,8 @@ final class KeychainService {
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecMatchLimit as String: kSecMatchLimitAll,
-            kSecReturnAttributes as String: kCFBooleanTrue!
+            kSecReturnAttributes as String: kCFBooleanTrue!,
+            kSecUseDataProtectionKeychain as String: kCFBooleanTrue!
         ]
         
         var attributesResult: AnyObject?
@@ -50,7 +74,8 @@ final class KeychainService {
                 kSecAttrService as String: service,
                 kSecAttrAccount as String: account,
                 kSecMatchLimit as String: kSecMatchLimitOne,
-                kSecReturnData as String: kCFBooleanTrue!
+                kSecReturnData as String: kCFBooleanTrue!,
+                kSecUseDataProtectionKeychain as String: kCFBooleanTrue!
             ]
             
             var dataResult: AnyObject?
@@ -69,7 +94,8 @@ final class KeychainService {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: id.uuidString
+            kSecAttrAccount as String: id.uuidString,
+            kSecUseDataProtectionKeychain as String: kCFBooleanTrue!
         ]
         SecItemDelete(query as CFDictionary)
     }
