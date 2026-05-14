@@ -34,6 +34,18 @@ final class TokenStore {
         keychain.delete(id: token.id)
     }
     
+    @discardableResult
+    public func addBulk(_ newTokens: [OTPToken]) -> Int {
+        var addedCount = 0
+        for token in newTokens {
+            guard !contains(token) else { continue }
+            tokens.append(token)
+            keychain.save(token)
+            addedCount += 1
+        }
+        return addedCount
+    }
+    
     // MARK: - Private
     
     private func load() {
