@@ -12,17 +12,39 @@ enum ParsingError: String, Error {
     case qrCodeNotFound
     case invalidQRCode
     case invalidSecret
+    case unknownScheme
+    
+    var errorDescription: String? {
+        switch self {
+        case .qrCodeNotFound: return "No QR code found in image"
+        case .invalidQRCode, .invalidSecret: return "Data from QR Code couldn't be read"
+        case .unknownScheme: return "URL scheme is invalid"
+        }
+    }
+}
+
+enum ParseResult {
+    case single(OTPToken)
+    case migration([OTPToken])
 }
 
 enum OTPParser {
     
     // MARK: - Public
     
-    public static func parseQRCode(from image: NSImage) throws -> OTPToken {
+    public static func parseQRCode(from image: NSImage) throws -> ParseResult {
         let payload = try extractQRCodeURL(image)
-        let token = try parseOTPAuth(payload)
-        
-        return token
+            
+        switch payload.scheme {
+        case "otpauth":
+            let token = try parseOTPAuth(payload)
+            return .single(token)
+        case "otpauth-migration":
+            let tokens = try GoogleMigrationParser.parse(url: payload)
+            return .migration(tokens)
+        default:
+            throw ParsingError.unknownScheme
+        }
     }
     
     // MARK: - Private

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct AddTokenView: View {
+    @State private var showingMigrationHelp = false
     @State private var issuer = ""
     @State private var account = ""
     @State private var secretBase32 = ""
@@ -18,12 +19,27 @@ struct AddTokenView: View {
     @State private var error: String?
     
     var onAdd: (OTPToken) -> Void
+    var onBulkInsert: ([OTPToken]) -> Void
     var onCancel: () -> Void
     
     var body: some View {
         DropZone(isTargeted: $isTargeted, onImage: handleImage(_:))
                         .frame(height: 140)
                         .padding(20)
+        
+        Button {
+            showingMigrationHelp = true
+        } label: {
+            Label("How to import from Google Authenticator", systemImage: "questionmark.circle")
+        }
+        .buttonStyle(.borderless)
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .popover(isPresented: $showingMigrationHelp, arrowEdge: .top) {
+            GoogleMigrationHelpView()
+                .frame(width: 360)
+                .padding()
+        }
 
         Divider()
         
@@ -107,18 +123,21 @@ struct AddTokenView: View {
         error = nil
         
         do {
-            let token = try OTPParser.parseQRCode(from: image)
+            let result = try OTPParser.parseQRCode(from: image)
             
-            issuer = token.issuer
-            account = token.account
-            secretBase32 = token.secret.base32EncodedString()
-            algorithm = token.algorithm
-            digits = token.digits
-            period = token.period
-        } catch ParsingError.qrCodeNotFound {
-            error = "No QR code found in image"
-        } catch ParsingError.invalidQRCode, ParsingError.invalidSecret {
-            error = "Invalid QR Code"
+            switch result {
+            case .single(let token):
+                issuer = token.issuer
+                account = token.account
+                secretBase32 = token.secret.base32EncodedString()
+                algorithm = token.algorithm
+                digits = token.digits
+                period = token.period
+            case .migration(let tokens):
+                onBulkInsert(tokens)
+            }
+        } catch let e as ParsingError {
+            error = e.errorDescription
         } catch let e {
             error = e.localizedDescription
         }
@@ -127,6 +146,8 @@ struct AddTokenView: View {
 
 #Preview {
     AddTokenView { _ in
+        //
+    } onBulkInsert: { _ in
         //
     } onCancel: {
         //

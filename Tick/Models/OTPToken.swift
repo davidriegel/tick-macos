@@ -15,8 +15,9 @@ struct OTPToken: Identifiable, Codable, Hashable {
     let algorithm: OTPAlgorithm
     let digits: Int
     let period: Int
+    var sortIndex: Int
     
-    init(issuer: String, account: String, secret: Data, algorithm: OTPAlgorithm = .sha1, digits: Int = 6, period: Int = 30) {
+    init(issuer: String, account: String, secret: Data, algorithm: OTPAlgorithm = .sha1, digits: Int = 6, period: Int = 30, sortIndex: Int = 0) {
         self.id = UUID()
         self.issuer = issuer
         self.account = account
@@ -24,5 +25,6 @@ struct OTPToken: Identifiable, Codable, Hashable {
         self.algorithm = algorithm
         self.digits = digits
         self.period = period
+        self.sortIndex = sortIndex
     }
 }
