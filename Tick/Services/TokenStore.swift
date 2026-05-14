@@ -25,22 +25,24 @@ final class TokenStore {
     
     public func add(_ token: OTPToken) {
         guard !contains(token) else { return }
-        tokens.append(token)
-        keychain.save(token)
-    }
-    
-    public func remove(_ token: OTPToken) {
-        tokens.removeAll { $0.id == token.id }
-        keychain.delete(id: token.id)
+        var newToken = token
+        newToken.sortIndex = nextSortIndex()
+        tokens.append(newToken)
+        keychain.save(newToken)
     }
     
     @discardableResult
     public func addBulk(_ newTokens: [OTPToken]) -> Int {
         var addedCount = 0
+        var nextIndex = nextSortIndex()
+        
         for token in newTokens {
             guard !contains(token) else { continue }
-            tokens.append(token)
-            keychain.save(token)
+            var newToken = token
+            newToken.sortIndex = nextIndex
+            tokens.append(newToken)
+            keychain.save(newToken)
+            nextIndex += 1
             addedCount += 1
         }
         return addedCount
@@ -52,10 +54,15 @@ final class TokenStore {
         keychain.save(token)
     }
     
+    public func remove(_ token: OTPToken) {
+        tokens.removeAll { $0.id == token.id }
+        keychain.delete(id: token.id)
+    }
+    
     // MARK: - Private
     
-    private func load() {
-        tokens = keychain.loadAll()
+    private func nextSortIndex() -> Int {
+        (tokens.map(\.sortIndex).max() ?? -1) + 1
     }
     
     private func contains(_ token: OTPToken) -> Bool {
@@ -64,5 +71,9 @@ final class TokenStore {
             existing.issuer == token.issuer &&
             existing.account == token.account
         }
+    }
+    
+    private func load() {
+        tokens = keychain.loadAll().sorted { $0.sortIndex < $1.sortIndex }
     }
 }
