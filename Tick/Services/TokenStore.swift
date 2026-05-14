@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 @Observable
 final class TokenStore {
@@ -52,6 +53,15 @@ final class TokenStore {
         guard let index = tokens.firstIndex(where: { $0.id == token.id }) else { return }
         tokens[index] = token
         keychain.save(token)
+    }
+    
+    public func reorder(fromOffsets source: IndexSet, toOffset destination: Int) {
+        tokens.move(fromOffsets: source, toOffset: destination)
+        
+        for i in tokens.indices {
+            tokens[i].sortIndex = i
+            keychain.save(tokens[i])
+        }
     }
     
     public func remove(_ token: OTPToken) {
