@@ -9,7 +9,7 @@ import Foundation
 import Security
 
 final class KeychainService {
-    private let service = "com.davidriegel.tick"
+    private let service = "com.davidriegel.Tick"
     
     func save(_ token: OTPToken) {
         guard let data = try? JSONEncoder().encode(token) else { return }
@@ -27,18 +27,42 @@ final class KeychainService {
     }
     
     func loadAll() -> [OTPToken] {
-        let query: [String: Any] = [
+        let attributesQuery: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecMatchLimit as String: kSecMatchLimitAll,
-            kSecReturnData as String: true
+            kSecReturnAttributes as String: kCFBooleanTrue!
         ]
         
-        var result: AnyObject?
-        SecItemCopyMatching(query as CFDictionary, &result)
+        var attributesResult: AnyObject?
+        let attributesStatus = SecItemCopyMatching(attributesQuery as CFDictionary, &attributesResult)
         
-        guard let dataArray = result as? [Data] else { return [] }
-        return dataArray.compactMap { try? JSONDecoder().decode(OTPToken.self, from: $0) }
+        guard attributesStatus == errSecSuccess,
+              let items = attributesResult as? [[String: Any]] else {
+            return []
+        }
+        
+        return items.compactMap { item in
+            guard let account = item[kSecAttrAccount as String] as? String else { return nil }
+            
+            let dataQuery: [String: Any] = [
+                kSecClass as String: kSecClassGenericPassword,
+                kSecAttrService as String: service,
+                kSecAttrAccount as String: account,
+                kSecMatchLimit as String: kSecMatchLimitOne,
+                kSecReturnData as String: kCFBooleanTrue!
+            ]
+            
+            var dataResult: AnyObject?
+            let dataStatus = SecItemCopyMatching(dataQuery as CFDictionary, &dataResult)
+            
+            guard dataStatus == errSecSuccess,
+                  let data = dataResult as? Data else {
+                return nil
+            }
+            
+            return try? JSONDecoder().decode(OTPToken.self, from: data)
+        }
     }
     
     func delete(id: UUID) {
