@@ -12,6 +12,7 @@ struct TokenListView: View {
     @State private var showingMigrationHelp = false
     @State private var showingAdd = false
     @State private var tokenToDelete: OTPToken?
+    @State private var tokenToEdit: OTPToken?
     @State private var migrationResult: MigrationResult?
     
     struct MigrationResult: Identifiable {
@@ -34,19 +35,27 @@ struct TokenListView: View {
                     showingAdd = true
                 }
                 .keyboardShortcut(KeyboardShortcut(KeyEquivalent("n")))
-                .sheet(isPresented: $showingAdd) {
-                    AddTokenView { token in
-                        tokenStore.add(token)
-                        showingAdd = false
-                    } onBulkInsert: { tokens in
-                        let added = tokenStore.addBulk(tokens)
-                        let skipped = tokens.count - added
-                        showingAdd = false
-                        migrationResult = MigrationResult(added: added, skipped: skipped)
-                    } onCancel: {
-                        showingAdd = false
-                    }
-                }
+            }
+        }
+        .sheet(isPresented: $showingAdd) {
+            AddTokenView { token in
+                tokenStore.add(token)
+                showingAdd = false
+            } onBulkInsert: { tokens in
+                let added = tokenStore.addBulk(tokens)
+                let skipped = tokens.count - added
+                showingAdd = false
+                migrationResult = MigrationResult(added: added, skipped: skipped)
+            } onCancel: {
+                showingAdd = false
+            }
+        }
+        .sheet(item: $tokenToEdit) { token in
+            EditTokenView(token: token) { updated in
+                tokenStore.update(updated)
+                tokenToEdit = nil
+            } onCancel: {
+                tokenToEdit = nil
             }
         }
         .alert(
@@ -98,6 +107,11 @@ struct TokenListView: View {
                         NSPasteboard.general.setString(token.account, forType: .string)
                     }
                     
+                    Divider()
+                    
+                    Button("Edit…") {
+                        tokenToEdit = token
+                    }
                     Divider()
                     
                     Button("Delete", role: .destructive) {
