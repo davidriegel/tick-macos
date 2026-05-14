@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TokenListView: View {
     @Environment(TokenStore.self) private var tokenStore
+    @State private var showingMigrationHelp = false
     @State private var showingAdd = false
     @State private var tokenToDelete: OTPToken?
     @State private var migrationResult: MigrationResult?
@@ -105,15 +106,43 @@ struct TokenListView: View {
                 }
         }
     }
-    
+
     // MARK: - Empty State
-    
+
     var emptyState: some View {
-        ContentUnavailableView(
-            "No tokens added",
-            systemImage: "lock.shield",
-            description: Text("Add a new one with ⌘N")
-        )
+        VStack(spacing: 32) {
+            ContentUnavailableView(
+                "No tokens added",
+                systemImage: "lock.shield",
+                description: Text("Add a new one with ⌘N")
+            )
+            
+            VStack(spacing: 10) {
+                Text("Migrating from Google Authenticator?")
+                    .font(.headline)
+                
+                Text("Export your accounts in Google Authenticator and drop the QR code screenshot into Tick.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: 360)
+                
+                Button("How to import") {
+                    showingMigrationHelp = true
+                }
+                .buttonStyle(.borderless)
+                .font(.subheadline)
+                .padding(.top, 4)
+            }
+            .padding(24)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+            .padding(.horizontal, 40)
+        }
+        .popover(isPresented: $showingMigrationHelp, arrowEdge: .top) {
+            GoogleMigrationHelpView()
+                .frame(width: 360)
+                .padding()
+        }
     }
 }
 
