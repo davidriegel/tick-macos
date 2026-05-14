@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct AddTokenView: View {
+    @State private var showingMigrationHelp = false
     @State private var issuer = ""
     @State private var account = ""
     @State private var secretBase32 = ""
@@ -25,6 +26,20 @@ struct AddTokenView: View {
         DropZone(isTargeted: $isTargeted, onImage: handleImage(_:))
                         .frame(height: 140)
                         .padding(20)
+        
+        Button {
+            showingMigrationHelp = true
+        } label: {
+            Label("How to import from Google Authenticator", systemImage: "questionmark.circle")
+        }
+        .buttonStyle(.borderless)
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .popover(isPresented: $showingMigrationHelp, arrowEdge: .top) {
+            GoogleMigrationHelpView()
+                .frame(width: 360)
+                .padding()
+        }
 
         Divider()
         
