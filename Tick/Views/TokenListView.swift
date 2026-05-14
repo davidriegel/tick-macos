@@ -26,8 +26,9 @@ struct TokenListView: View {
                 }
                 .keyboardShortcut(KeyboardShortcut(KeyEquivalent("n")))
                 .sheet(isPresented: $showingAdd) {
-                    AddTokenView { _ in
-                        //
+                    AddTokenView { token in
+                        tokenStore.add(token)
+                        showingAdd = false
                     } onCancel: {
                         showingAdd = false
                     }
