@@ -94,30 +94,33 @@ struct TokenListView: View {
     // MARK: - TokenList
     
     var tokenList: some View {
-        List(tokenStore.tokens) { token in
-            TokenRowView(token: token)
-                .contextMenu {
-                    Button("Copy Code") {
-                        NSPasteboard.general.clearContents()
-                        NSPasteboard.general.setString(TOTPGenerator.generate(for: token), forType: .string)
+        List() {
+            ForEach(tokenStore.tokens) { token in
+                TokenRowView(token: token)
+                    .contextMenu {
+                        Button("Copy Code") {
+                            NSPasteboard.general.clearContents()
+                            NSPasteboard.general.setString(TOTPGenerator.generate(for: token), forType: .string)
+                        }
+                        
+                        Button("Copy Account") {
+                            NSPasteboard.general.clearContents()
+                            NSPasteboard.general.setString(token.account, forType: .string)
+                        }
+                        
+                        Divider()
+                        
+                        Button("Edit…") {
+                            tokenToEdit = token
+                        }
+                        Divider()
+                        
+                        Button("Delete", role: .destructive) {
+                            tokenToDelete = token
+                        }
                     }
-                    
-                    Button("Copy Account") {
-                        NSPasteboard.general.clearContents()
-                        NSPasteboard.general.setString(token.account, forType: .string)
-                    }
-                    
-                    Divider()
-                    
-                    Button("Edit…") {
-                        tokenToEdit = token
-                    }
-                    Divider()
-                    
-                    Button("Delete", role: .destructive) {
-                        tokenToDelete = token
-                    }
-                }
+            }
+            .onMove(perform: tokenStore.reorder)
         }
     }
 
