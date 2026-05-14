@@ -24,6 +24,7 @@ final class TokenStore {
     // MARK: - Public
     
     public func add(_ token: OTPToken) {
+        guard !contains(token) else { return }
         tokens.append(token)
         keychain.save(token)
     }
@@ -37,5 +38,13 @@ final class TokenStore {
     
     private func load() {
         tokens = keychain.loadAll()
+    }
+    
+    private func contains(_ token: OTPToken) -> Bool {
+        tokens.contains { existing in
+            existing.secret == token.secret &&
+            existing.issuer == token.issuer &&
+            existing.account == token.account
+        }
     }
 }
