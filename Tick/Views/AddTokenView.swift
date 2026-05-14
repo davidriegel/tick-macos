@@ -18,6 +18,7 @@ struct AddTokenView: View {
     @State private var error: String?
     
     var onAdd: (OTPToken) -> Void
+    var onBulkInsert: ([OTPToken]) -> Void
     var onCancel: () -> Void
     
     var body: some View {
@@ -107,14 +108,19 @@ struct AddTokenView: View {
         error = nil
         
         do {
-            let token = try OTPParser.parseQRCode(from: image)
+            let result = try OTPParser.parseQRCode(from: image)
             
-            issuer = token.issuer
-            account = token.account
-            secretBase32 = token.secret.base32EncodedString()
-            algorithm = token.algorithm
-            digits = token.digits
-            period = token.period
+            switch result {
+            case .single(let token):
+                issuer = token.issuer
+                account = token.account
+                secretBase32 = token.secret.base32EncodedString()
+                algorithm = token.algorithm
+                digits = token.digits
+                period = token.period
+            case .migration(let tokens):
+                onBulkInsert(tokens)
+            }
         } catch let e as ParsingError {
             error = e.errorDescription
         } catch let e {
@@ -125,6 +131,8 @@ struct AddTokenView: View {
 
 #Preview {
     AddTokenView { _ in
+        //
+    } onBulkInsert: { _ in
         //
     } onCancel: {
         //

@@ -11,6 +11,13 @@ struct TokenListView: View {
     @Environment(TokenStore.self) private var tokenStore
     @State private var showingAdd = false
     @State private var tokenToDelete: OTPToken?
+    @State private var migrationResult: MigrationResult?
+    
+    struct MigrationResult: Identifiable {
+        let id = UUID()
+        let added: Int
+        let skipped: Int
+    }
     
     var body: some View {
         NavigationStack {
@@ -30,10 +37,31 @@ struct TokenListView: View {
                     AddTokenView { token in
                         tokenStore.add(token)
                         showingAdd = false
+                    } onBulkInsert: { tokens in
+                        let added = tokenStore.addBulk(tokens)
+                        let skipped = tokens.count - added
+                        showingAdd = false
+                        migrationResult = MigrationResult(added: added, skipped: skipped)
                     } onCancel: {
                         showingAdd = false
                     }
                 }
+            }
+        }
+        .alert(
+            "Import Complete",
+            isPresented: .init(
+                get: { migrationResult != nil },
+                set: { if !$0 { migrationResult = nil } }
+            ),
+            presenting: migrationResult
+        ) { _ in
+            Button("OK") {}
+        } message: { result in
+            if result.skipped == 0 {
+                Text("\(result.added) token\(result.added == 1 ? "" : "s") imported.")
+            } else {
+                Text("\(result.added) imported, \(result.skipped) duplicate\(result.skipped == 1 ? "" : "s") skipped.")
             }
         }
         .confirmationDialog(
