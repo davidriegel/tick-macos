@@ -19,7 +19,7 @@ struct CircularProgressBarView: View {
                 .trim(from: 0, to: progress)
                 .stroke(Color.accentColor, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 .rotationEffect(.degrees(-90))
-            
+                .animation(.smooth, value: progress)
         }
     }
 }
