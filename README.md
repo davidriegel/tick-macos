@@ -33,11 +33,11 @@ for details.
 [Coming soon]
 
 ### From source
-\`\`\`bash
+```bash
 git clone https://github.com/davidriegel/tick-macos.git
 cd tick-macos
 open Tick.xcodeproj
-\`\`\`
+```
 
 Build and run with ⌘R in Xcode.
 
