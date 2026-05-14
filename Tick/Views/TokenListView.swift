@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TokenListView: View {
     @Environment(TokenStore.self) private var tokenStore
+    @State private var showingAdd = false
     
     var body: some View {
         NavigationStack {
@@ -17,6 +18,19 @@ struct TokenListView: View {
                     emptyState
                 } else {
                     tokenList
+                }
+            }
+            .toolbar {
+                Button("Add token", systemImage: "plus") {
+                    showingAdd = true
+                }
+                .keyboardShortcut(KeyboardShortcut(KeyEquivalent("n")))
+                .sheet(isPresented: $showingAdd) {
+                    AddTokenView { _ in
+                        //
+                    } onCancel: {
+                        showingAdd = false
+                    }
                 }
             }
         }
@@ -34,18 +48,16 @@ struct TokenListView: View {
     
     var emptyState: some View {
         VStack {
-            Text("No tokens saved")
-                .font(.title)
-                .fontWeight(.semibold)
-            Button("Add token", systemImage: "plus") {
-                
-            }
+            ContentUnavailableView(
+                "No tokens added",
+                systemImage: "lock.shield",
+                description: Text("Add a new one with ⌘N")
+            )
         }
     }
 }
 
-#Preview("Empty state") {
+#Preview() {
     TokenListView()
-        .frame(minWidth: 300, minHeight: 500)
         .environment(TokenStore())
 }
