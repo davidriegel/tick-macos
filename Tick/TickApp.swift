@@ -14,7 +14,6 @@ struct TickApp: App {
     var body: some Scene {
         WindowGroup {
             TokenListView()
-                .frame(minWidth: 300, idealWidth: 300, minHeight: 500, idealHeight: 500)
                 .environment(tokenStore)
         }
     }
