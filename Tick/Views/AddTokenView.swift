@@ -115,10 +115,8 @@ struct AddTokenView: View {
             algorithm = token.algorithm
             digits = token.digits
             period = token.period
-        } catch ParsingError.qrCodeNotFound {
-            error = "No QR code found in image"
-        } catch ParsingError.invalidQRCode, ParsingError.invalidSecret {
-            error = "Invalid QR Code"
+        } catch let e as ParsingError {
+            error = e.errorDescription
         } catch let e {
             error = e.localizedDescription
         }

@@ -12,6 +12,13 @@ enum ParsingError: String, Error {
     case qrCodeNotFound
     case invalidQRCode
     case invalidSecret
+    
+    var errorDescription: String? {
+        switch self {
+        case .qrCodeNotFound: return "No QR code found in image"
+        case .invalidQRCode, .invalidSecret: return "Data from QR Code couldn't be read"
+        }
+    }
 }
 
 enum OTPParser {
