@@ -69,7 +69,16 @@ struct MenuBarView: View {
         HStack {
             Button {
                 openWindow(id: "main")
-                NSApp.activate(ignoringOtherApps: true)
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    guard let window = NSApp.windows.first(where: { $0.title == "Tick" }) else { return }
+                    
+                    window.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
+                    
+                    NSApp.activate(ignoringOtherApps: true)
+                    window.makeKeyAndOrderFront(nil)
+                    window.orderFrontRegardless()
+                }
             } label: {
                 Label("Open Tick", systemImage: "macwindow")
             }
