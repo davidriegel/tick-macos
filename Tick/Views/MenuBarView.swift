@@ -53,9 +53,9 @@ struct MenuBarView: View {
             Image(systemName: "lock.shield")
                 .font(.largeTitle)
                 .foregroundStyle(.secondary)
-            Text("No tokens yet")
+            Text(.menubarviewNotokens)
                 .font(.headline)
-            Text("Add one in the main window")
+            Text(.menubarviewAddtokens)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -80,7 +80,7 @@ struct MenuBarView: View {
                     window.orderFrontRegardless()
                 }
             } label: {
-                Label("Open Tick", systemImage: "macwindow")
+                Label(.menubarviewOpen, systemImage: "macwindow")
             }
             .buttonStyle(.borderless)
             
@@ -89,7 +89,7 @@ struct MenuBarView: View {
             Button {
                 NSApp.terminate(nil)
             } label: {
-                Label("Quit", systemImage: "power")
+                Label(.menubarviewQuit, systemImage: "power")
             }
             .buttonStyle(.borderless)
             .keyboardShortcut("q", modifiers: .command)
