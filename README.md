@@ -1,8 +1,8 @@
-# Tick Authenticator
-
 A clean, lightweight TOTP authenticator for macOS. Generate two-factor 
 authentication codes from the menu bar, with everything stored locally 
 in the macOS Keychain.
+
+<a href="https://apps.apple.com/de/app/tick-authenticator/id6769394798"> <img width="156" height="40" alt="Download_on_the_Mac_App_Store_Badge_US-UK_RGB_blk_092917" src="https://github.com/user-attachments/assets/7f47c772-7aab-4146-bacb-76e87d3f0432">
 
 ## Features
 
@@ -26,11 +26,6 @@ for details.
 
 - macOS 26 or later
 - Xcode 26 or later (for building from source)
-
-## Installation
-
-### From the Mac App Store
-[Coming soon]
 
 ### From source
 ```bash
@@ -66,10 +61,6 @@ Contributions are welcome. Feel free to open issues for bugs or feature
 requests, or submit pull requests.
 
 For larger changes, please open an issue first to discuss the approach.
-
-## License
-
-[MIT](LICENSE) © David Riegel
 
 ## Acknowledgements
 
