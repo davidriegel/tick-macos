@@ -30,17 +30,33 @@ struct MenuBarView: View {
     
     // MARK: - Token List
     
+
+    // For smaller token counts, render the VStack directly to ensure natural sizing.
+    // If the token count exceeds scrollThreshold, wrap tokenListContent in ScrollView with scrolledHeight.
+    private static let scrollThreshold = 7
+    private static let scrolledHeight: CGFloat = 420
+
+    @ViewBuilder
     private var tokenList: some View {
-        ScrollView {
-            LazyVStack(spacing: 0) {
-                ForEach(tokenStore.tokens) { token in
-                    TokenRowView(token: token)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                    
-                    if token.id != tokenStore.tokens.last?.id {
-                        Divider()
-                    }
+        if tokenStore.tokens.count > Self.scrollThreshold {
+            ScrollView {
+                tokenListContent
+            }
+            .frame(height: Self.scrolledHeight)
+        } else {
+            tokenListContent
+        }
+    }
+
+    private var tokenListContent: some View {
+        VStack(spacing: 0) {
+            ForEach(tokenStore.tokens) { token in
+                TokenRowView(token: token)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+
+                if token.id != tokenStore.tokens.last?.id {
+                    Divider()
                 }
             }
         }
