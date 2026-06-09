@@ -16,9 +16,9 @@ enum ParsingError: String, Error {
     
     var errorDescription: String? {
         switch self {
-        case .qrCodeNotFound: return "No QR code found in image"
-        case .invalidQRCode, .invalidSecret: return "Data from QR Code couldn't be read"
-        case .unknownScheme: return "URL scheme is invalid"
+        case .qrCodeNotFound: return String(localized: .errorParsingQrCodeNotFound)
+        case .invalidQRCode, .invalidSecret: return String(localized: .errorParsingInvalidData)
+        case .unknownScheme: return String(localized: .errorParsingUnknownScheme)
         }
     }
 }

@@ -27,27 +27,27 @@ struct EditTokenView: View {
     
     var body: some View {
         Form {
-            Section("Account") {
-                TextField("Issuer", text: $issuer, prompt: Text("e.g. GitHub"))
+            Section(LocalizedStringResource.edittokenviewSectionAccount) {
+                TextField(.edittokenviewIssuerLabel, text: $issuer, prompt: Text(.edittokenviewIssuerPlaceholder))
                     .autocorrectionDisabled()
-                TextField("Account", text: $account, prompt: Text("e.g. you@example.com"))
+                TextField(.edittokenviewAccountLabel, text: $account, prompt: Text(.edittokenviewAccountPlaceholder))
                     .autocorrectionDisabled()
             }
-            
-            Section("Token Details") {
-                LabeledContent("Algorithm", value: token.algorithm.rawValue.uppercased())
-                LabeledContent("Digits", value: "\(token.digits)")
-                LabeledContent("Period", value: "\(token.period) seconds")
+
+            Section(LocalizedStringResource.edittokenviewSectionDetails) {
+                LabeledContent(LocalizedStringResource.edittokenviewLabelAlgorithm, value: token.algorithm.rawValue.uppercased())
+                LabeledContent(LocalizedStringResource.edittokenviewLabelDigits, value: "\(token.digits)")
+                LabeledContent(LocalizedStringResource.edittokenviewLabelPeriod, value: String(localized: .edittokenviewPeriodValue(token.period)))
             }
         }
         .formStyle(.grouped)
         .frame(minWidth: 420, idealWidth: 460, minHeight: 360)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel", action: onCancel)
+                Button(.edittokenviewCancel, action: onCancel)
             }
             ToolbarItem(placement: .confirmationAction) {
-                Button("Save", action: save)
+                Button(.edittokenviewSave, action: save)
                     .disabled(!isValid)
             }
         }

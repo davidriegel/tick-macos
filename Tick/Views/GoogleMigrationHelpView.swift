@@ -10,20 +10,20 @@ import SwiftUI
 struct GoogleMigrationHelpView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Import from Google Authenticator")
+            Text(.migrationhelpTitle)
                 .font(.headline)
-            
+
             VStack(alignment: .leading, spacing: 8) {
-                HelpStep(number: 1, text: "Open Google Authenticator on your phone")
-                HelpStep(number: 2, text: "Tap the menu item")
-                HelpStep(number: 3, text: "Select \"Transfer accounts\" → \"Export accounts\"")
-                HelpStep(number: 4, text: "Verify your identity if asked")
-                HelpStep(number: 5, text: "Select the accounts you want to transfer")
-                HelpStep(number: 6, text: "Take a screenshot of the QR code(s) shown")
-                HelpStep(number: 7, text: "Drop the screenshot into the area above")
+                HelpStep(number: 1, text: .migrationhelpStep1)
+                HelpStep(number: 2, text: .migrationhelpStep2)
+                HelpStep(number: 3, text: .migrationhelpStep3)
+                HelpStep(number: 4, text: .migrationhelpStep4)
+                HelpStep(number: 5, text: .migrationhelpStep5)
+                HelpStep(number: 6, text: .migrationhelpStep6)
+                HelpStep(number: 7, text: .migrationhelpStep7)
             }
-            
-            Text("Google may generate multiple QR codes if you have many accounts. Drop them one by one.")
+
+            Text(.migrationhelpHint)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -32,8 +32,8 @@ struct GoogleMigrationHelpView: View {
 
 struct HelpStep: View {
     let number: Int
-    let text: String
-    
+    let text: LocalizedStringResource
+
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
             Text("\(number).")

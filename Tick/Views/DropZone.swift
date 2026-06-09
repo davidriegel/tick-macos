@@ -29,9 +29,9 @@ struct DropZone: View {
                     Image(systemName: "qrcode.viewfinder")
                         .font(.system(size: 32))
                         .foregroundStyle(.secondary)
-                    Text("Drop QR code image here")
+                    Text(.dropzoneTitle)
                         .font(.callout)
-                    Button("Choose Image…") { showPicker = true }
+                    Button(.dropzoneChooseImage) { showPicker = true }
                         .buttonStyle(.link)
                 }
             }

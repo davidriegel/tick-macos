@@ -30,7 +30,7 @@ struct AddTokenView: View {
         Button {
             showingMigrationHelp = true
         } label: {
-            Label("How to import from Google Authenticator", systemImage: "questionmark.circle")
+            Label(.addtokenviewMigrationCta, systemImage: "questionmark.circle")
         }
         .buttonStyle(.borderless)
         .font(.caption)
@@ -44,46 +44,46 @@ struct AddTokenView: View {
         Divider()
         
         Form {
-            Section("Account") {
-                TextField("Issuer (e.g. GitHub)", text: $issuer)
+            Section(LocalizedStringResource.addtokenviewSectionAccount) {
+                TextField(.addtokenviewIssuerPlaceholder, text: $issuer)
                     .autocorrectionDisabled()
                     .font(.body)
-                TextField("Account (e.g. user@example.com)", text: $account)
+                TextField(.addtokenviewAccountPlaceholder, text: $account)
                     .autocorrectionDisabled()
                     .font(.body)
             }
             .font(.title2)
-            
-            Section("Secret") {
-                TextField("Base32 secret", text: $secretBase32)
+
+            Section(LocalizedStringResource.addtokenviewSectionSecret) {
+                TextField(.addtokenviewSecretPlaceholder, text: $secretBase32)
                     .autocorrectionDisabled()
                     .font(.system(.body, design: .monospaced))
             }
             .font(.title2)
-            
-            Section("Advanced") {
-                Picker("Algorithm", selection: $algorithm) {
+
+            Section(LocalizedStringResource.addtokenviewSectionAdvanced) {
+                Picker(.addtokenviewPickerAlgorithm, selection: $algorithm) {
                     Text("SHA1").tag(OTPAlgorithm.sha1)
                     Text("SHA256").tag(OTPAlgorithm.sha256)
                     Text("SHA512").tag(OTPAlgorithm.sha512)
                 }
                 .font(.body)
-                
-                Picker("Digits", selection: $digits) {
+
+                Picker(.addtokenviewPickerDigits, selection: $digits) {
                     Text("6").tag(6)
                     Text("7").tag(7)
                     Text("8").tag(8)
                 }
                 .font(.body)
-                
-                Picker("Period", selection: $period) {
-                    Text("30 seconds").tag(30)
-                    Text("60 seconds").tag(60)
+
+                Picker(.addtokenviewPickerPeriod, selection: $period) {
+                    Text(.addtokenviewPeriod30).tag(30)
+                    Text(.addtokenviewPeriod60).tag(60)
                 }
                 .font(.body)
             }
             .font(.title2)
-            
+
 
             if let error {
                 Text(error).foregroundStyle(.red).font(.caption)
@@ -92,10 +92,10 @@ struct AddTokenView: View {
         .formStyle(.grouped)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel", action: onCancel)
+                Button(.addtokenviewCancel, action: onCancel)
             }
             ToolbarItem(placement: .confirmationAction) {
-                Button("Add", action: add).disabled(!isValid)
+                Button(.addtokenviewAdd, action: add).disabled(!isValid)
             }
         }
     }
@@ -107,7 +107,7 @@ struct AddTokenView: View {
 
     private func add() {
         guard let secret = Data(base32Encoded: secretBase32), !secret.isEmpty else {
-            error = "Invalid Base32 secret"
+            error = String(localized: .addtokenviewErrorInvalidSecret)
             return
         }
         

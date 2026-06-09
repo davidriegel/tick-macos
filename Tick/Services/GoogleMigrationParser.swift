@@ -14,9 +14,9 @@ enum MigrationError: Error, LocalizedError {
     
     var errorDescription: String? {
         switch self {
-        case .notAMigrationURL: return "Not a Google Authenticator migration URL"
-        case .invalidData: return "Migration data is not valid base64"
-        case .malformedProtobuf: return "Migration data is malformed"
+        case .notAMigrationURL: return String(localized: .errorMigrationNotAMigrationUrl)
+        case .invalidData: return String(localized: .errorMigrationInvalidData)
+        case .malformedProtobuf: return String(localized: .errorMigrationMalformedProtobuf)
         }
     }
 }
