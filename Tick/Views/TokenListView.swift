@@ -31,7 +31,7 @@ struct TokenListView: View {
                 }
             }
             .toolbar {
-                Button("Add token", systemImage: "plus") {
+                Button(.tokenlistviewToolbarAdd, systemImage: "plus") {
                     showingAdd = true
                 }
                 .keyboardShortcut(KeyboardShortcut(KeyEquivalent("n")))
@@ -59,35 +59,35 @@ struct TokenListView: View {
             }
         }
         .alert(
-            "Import Complete",
+            String(localized: .tokenlistviewImportTitle),
             isPresented: .init(
                 get: { migrationResult != nil },
                 set: { if !$0 { migrationResult = nil } }
             ),
             presenting: migrationResult
         ) { _ in
-            Button("OK") {}
+            Button(.tokenlistviewImportOk) {}
         } message: { result in
             if result.skipped == 0 {
-                Text("\(result.added) token\(result.added == 1 ? "" : "s") imported.")
+                Text(.tokenlistviewImportSuccessOnly(result.added))
             } else {
-                Text("\(result.added) imported, \(result.skipped) duplicate\(result.skipped == 1 ? "" : "s") skipped.")
+                Text(.tokenlistviewImportSuccessWithSkipped(result.added, duplicates: result.skipped))
             }
         }
         .confirmationDialog(
-            "Delete Token?",
+            String(localized: .tokenlistviewDeleteTitle),
             isPresented: .init(
                 get: { tokenToDelete != nil },
                 set: { if !$0 { tokenToDelete = nil } }
             ),
             presenting: tokenToDelete
         ) { token in
-            Button("Delete \(token.issuer)", role: .destructive) {
+            Button(.tokenlistviewDeleteConfirm(token.issuer), role: .destructive) {
                 tokenStore.remove(token)
             }
-            Button("Cancel", role: .cancel) {}
+            Button(.tokenlistviewDeleteCancel, role: .cancel) {}
         } message: { token in
-            Text("This will permanently remove the TOTP for \(token.issuer) (\(token.account)). You can't undo this.")
+            Text(.tokenlistviewDeleteMessage(token.issuer, token.account))
         }
     }
     
@@ -98,24 +98,24 @@ struct TokenListView: View {
             ForEach(tokenStore.tokens) { token in
                 TokenRowView(token: token)
                     .contextMenu {
-                        Button("Copy Code") {
+                        Button(.tokenlistviewContextmenuCopyTOTP) {
                             NSPasteboard.general.clearContents()
                             NSPasteboard.general.setString(TOTPGenerator.generate(for: token), forType: .string)
                         }
                         
-                        Button("Copy Account") {
+                        Button(.tokenlistviewContextmenuCopyAccount) {
                             NSPasteboard.general.clearContents()
                             NSPasteboard.general.setString(token.account, forType: .string)
                         }
                         
                         Divider()
                         
-                        Button("Edit…") {
+                        Button(.tokenlistviewContextmenuEdit) {
                             tokenToEdit = token
                         }
                         Divider()
                         
-                        Button("Delete", role: .destructive) {
+                        Button(.tokenlistviewContextmenuDelete, role: .destructive) {
                             tokenToDelete = token
                         }
                     }
@@ -129,22 +129,22 @@ struct TokenListView: View {
     var emptyState: some View {
         VStack(spacing: 32) {
             ContentUnavailableView(
-                "No tokens added",
+                .tokenlistviewUnavailableTitle,
                 systemImage: "lock.shield",
-                description: Text("Add a new one with ⌘N")
+                description: Text(.tokenlistviewUnavailableDescription)
             )
             
             VStack(spacing: 10) {
-                Text("Migrating from Google Authenticator?")
+                Text(.tokenlistviewMigrationTitle)
                     .font(.headline)
                 
-                Text("Export your accounts in Google Authenticator and drop the QR code screenshot into Tick.")
+                Text(.tokenlistviewMigrationDescription)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: 360)
                 
-                Button("How to import") {
+                Button(.tokenlistviewMigrationCta) {
                     showingMigrationHelp = true
                 }
                 .buttonStyle(.borderless)
