@@ -10,14 +10,15 @@ import SwiftUI
 struct CircularProgressBarView: View {
     let progress: Double
     let lineWidth: CGFloat = 5
+    var color: Color = .accentColor
     
     var body: some View {
         ZStack {
             Circle()
-                .stroke(Color.accentColor.opacity(0.3), lineWidth: lineWidth)
+                .stroke(color.opacity(0.3), lineWidth: lineWidth)
             Circle()
                 .trim(from: 0, to: progress)
-                .stroke(Color.accentColor, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .stroke(color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 .rotationEffect(.degrees(-90))
                 .animation(.smooth, value: progress)
         }

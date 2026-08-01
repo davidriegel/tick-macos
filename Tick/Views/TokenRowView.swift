@@ -7,62 +7,70 @@
 
 import SwiftUI
 
+struct TokenRowContent: View {
+    let presentation: TokenPresentation
+    var showsCopiedIndicator: Bool = false
+    var accent: Color = .accentColor
+
+    var body: some View {
+        HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(presentation.issuer)
+                    .font(.headline)
+                Text(presentation.account)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Text(presentation.formattedCode)
+                .font(.system(.title2, design: .monospaced, weight: .medium))
+                .monospacedDigit()
+                .contentTransition(.numericText())
+                .animation(.default, value: presentation.code)
+
+            ZStack {
+                CircularProgressBarView(progress: presentation.progress, color: accent)
+                    .frame(width: 32, height: 32)
+                    .overlay {
+                        Text("\(presentation.secondsRemaining)")
+                            .font(.caption2)
+                            .monospacedDigit()
+                    }
+                    .opacity(showsCopiedIndicator ? 0 : 1)
+
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.title2)
+                    .foregroundStyle(.green)
+                    .opacity(showsCopiedIndicator ? 1 : 0)
+            }
+            .animation(.snappy, value: showsCopiedIndicator)
+        }
+        .padding(.vertical, 4)
+    }
+}
+
 struct TokenRowView: View {
     let token: OTPToken
     @State private var copied = false
-    
+
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1.0)) { context in
-            let otpCode = TOTPGenerator.generate(for: token, at: context.date)
-            let otpProgress = TOTPGenerator.progress(for: token, at: context.date)
-            let otpSeconds = TOTPGenerator.secondsRemaining(for: token, at: context.date)
-            
-            HStack(spacing: 16) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(token.issuer)
-                        .font(.headline)
-                    Text(token.account)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+            let presentation = TokenPresentation(token: token, at: context.date)
+
+            TokenRowContent(presentation: presentation, showsCopiedIndicator: copied)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    copyCode(presentation.code)
                 }
-                
-                Spacer()
-                
-                Text(formatCode(otpCode))
-                    .font(.system(.title2, design: .monospaced, weight: .medium))
-                    .monospacedDigit()
-                    .contentTransition(.numericText())
-                    .animation(.default, value: otpCode)
-                
-                ZStack {
-                    CircularProgressBarView(progress: otpProgress)
-                        .frame(width: 32, height: 32)
-                        .overlay {
-                            Text("\(otpSeconds)")
-                                .font(.caption2)
-                                .monospacedDigit()
-                        }
-                        .opacity(copied ? 0 : 1)
-                    
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.title2)
-                        .foregroundStyle(.green)
-                        .opacity(copied ? 1 : 0)
-                }
-                .animation(.snappy, value: copied)
-            }
-            .padding(.vertical, 4)
-            .contentShape(Rectangle())
-            .onTapGesture {
-                copyCode(otpCode)
-            }
         }
     }
-    
+
     private func copyCode(_ code: String) {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(code, forType: .string)
-        
+
         withAnimation(.snappy) {
             copied = true
         }
@@ -72,12 +80,6 @@ struct TokenRowView: View {
                 copied = false
             }
         }
-    }
-    
-    private func formatCode(_ code: String) -> String {
-        guard code.count == 6 else { return code }
-        let middleIndex = code.index(code.startIndex, offsetBy: 3)
-        return "\(code[..<middleIndex]) \(code[middleIndex...])"
     }
 }
 

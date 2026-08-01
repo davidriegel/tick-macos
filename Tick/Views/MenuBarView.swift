@@ -11,60 +11,145 @@ import SwiftUI
 struct MenuBarView: View {
     @Environment(TokenStore.self) private var tokenStore
     @Environment(\.openWindow) private var openWindow
-    
+
+    var body: some View {
+        MenuBarContent {
+            if tokenStore.tokens.isEmpty {
+                MenuBarEmptyState()
+            } else {
+                MenuBarTokenList(items: tokenStore.tokens) { token in
+                    TokenRowView(token: token)
+                }
+            }
+        } footer: {
+            MenuBarFooter(
+                onOpen: openMainWindow,
+                onQuit: { NSApp.terminate(nil) }
+            )
+        }
+    }
+
+    private func openMainWindow() {
+        openWindow(id: "main")
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            guard let window = NSApp.windows.first(where: { $0.title == "Tick" }) else { return }
+
+            window.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
+
+            NSApp.activate(ignoringOtherApps: true)
+            window.makeKeyAndOrderFront(nil)
+            window.orderFrontRegardless()
+        }
+    }
+}
+
+// MARK: - Content
+
+struct MenuBarContent<Content: View, Footer: View>: View {
+    private let content: Content
+    private let footer: Footer
+
+    init(@ViewBuilder content: () -> Content, @ViewBuilder footer: () -> Footer) {
+        self.content = content()
+        self.footer = footer()
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            if tokenStore.tokens.isEmpty {
-                emptyState
-            } else {
-                tokenList
-            }
-            
+            content
+
             Divider()
-            
+
             footer
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
         }
         .frame(width: 320)
         .frame(maxHeight: 480)
     }
-    
-    // MARK: - Token List
-    
+}
 
-    // For smaller token counts, render the VStack directly to ensure natural sizing.
-    // If the token count exceeds scrollThreshold, wrap tokenListContent in ScrollView with scrolledHeight.
-    private static let scrollThreshold = 7
-    private static let scrolledHeight: CGFloat = 420
+// MARK: - Token List
 
-    @ViewBuilder
-    private var tokenList: some View {
-        if tokenStore.tokens.count > Self.scrollThreshold {
+struct MenuBarTokenList<Item: Identifiable, Row: View>: View {
+    private let items: [Item]
+    private let row: (Item) -> Row
+
+    private static var scrollThreshold: Int { 7 }
+    private static var scrolledHeight: CGFloat { 420 }
+
+    init(items: [Item], @ViewBuilder row: @escaping (Item) -> Row) {
+        self.items = items
+        self.row = row
+    }
+
+    var body: some View {
+        if items.count > Self.scrollThreshold {
             ScrollView {
-                tokenListContent
+                stack
             }
             .frame(height: Self.scrolledHeight)
         } else {
-            tokenListContent
+            stack
         }
     }
 
-    private var tokenListContent: some View {
+    private var stack: some View {
         VStack(spacing: 0) {
-            ForEach(tokenStore.tokens) { token in
-                TokenRowView(token: token)
+            ForEach(items) { item in
+                row(item)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
 
-                if token.id != tokenStore.tokens.last?.id {
+                if item.id != items.last?.id {
                     Divider()
                 }
             }
         }
     }
-    
-    // MARK: - Empty State
-    
-    private var emptyState: some View {
+}
+
+// MARK: - Footer
+
+struct MenuBarFooter: View {
+    var onOpen: (() -> Void)?
+    var onQuit: (() -> Void)?
+
+    var body: some View {
+        HStack {
+            if let onOpen {
+                Button(action: onOpen) { openLabel }
+                    .buttonStyle(.borderless)
+            } else {
+                openLabel
+            }
+
+            Spacer()
+
+            if let onQuit {
+                Button(action: onQuit) { quitLabel }
+                    .buttonStyle(.borderless)
+                    .keyboardShortcut("q", modifiers: .command)
+            } else {
+                quitLabel
+            }
+        }
+    }
+
+    private var openLabel: some View {
+        Label(.menubarviewOpen, systemImage: "macwindow")
+    }
+
+    private var quitLabel: some View {
+        Label(.menubarviewQuit, systemImage: "power")
+    }
+}
+
+// MARK: - Empty State
+
+struct MenuBarEmptyState: View {
+    var body: some View {
         VStack(spacing: 8) {
             Image(systemName: "lock.shield")
                 .font(.largeTitle)
@@ -77,40 +162,5 @@ struct MenuBarView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 32)
-    }
-    
-    // MARK: - Footer
-    
-    private var footer: some View {
-        HStack {
-            Button {
-                openWindow(id: "main")
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                    guard let window = NSApp.windows.first(where: { $0.title == "Tick" }) else { return }
-                    
-                    window.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
-                    
-                    NSApp.activate(ignoringOtherApps: true)
-                    window.makeKeyAndOrderFront(nil)
-                    window.orderFrontRegardless()
-                }
-            } label: {
-                Label(.menubarviewOpen, systemImage: "macwindow")
-            }
-            .buttonStyle(.borderless)
-            
-            Spacer()
-            
-            Button {
-                NSApp.terminate(nil)
-            } label: {
-                Label(.menubarviewQuit, systemImage: "power")
-            }
-            .buttonStyle(.borderless)
-            .keyboardShortcut("q", modifiers: .command)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
     }
 }
