@@ -1064,6 +1064,23 @@
         }
       }
     },
+    "tokenlistview.contextmenu.copyTOTP" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code kopieren"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy Code"
+          }
+        }
+      }
+    },
     "tokenlistview.contextmenu.delete" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1406,23 +1423,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No tokens added"
-          }
-        }
-      }
-    },
-    "tokenlistviewContextmenuCopyTOTP" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Code kopieren"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copy Code"
           }
         }
       }
