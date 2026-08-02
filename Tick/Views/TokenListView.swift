@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct TokenListView: View {
+    static let windowSize = CGSize(width: 480, height: 600)
+
     @Environment(TokenStore.self) private var tokenStore
     @State private var showingMigrationHelp = false
     @State private var showingAdd = false
@@ -166,4 +168,5 @@ struct TokenListView: View {
 #Preview() {
     TokenListView()
         .environment(TokenStore())
+        .environment(AppSettings.shared)
 }
