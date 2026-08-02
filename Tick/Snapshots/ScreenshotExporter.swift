@@ -82,7 +82,7 @@ enum ScreenshotExporter {
                     .environment(\.locale, Locale(identifier: language))
 
                 guard let data = png(from: view, scale: scale) else {
-                    print("⚠️ \(name): Rendering fehlgeschlagen")
+                    print("⚠️ \(name): Rendering failed")
                     continue
                 }
 
@@ -93,7 +93,7 @@ enum ScreenshotExporter {
                     written.append(url)
                     print("✅ \(name) – \(data.count / 1024) KB")
                 } catch {
-                    print("⚠️ \(name): Schreiben fehlgeschlagen – \(error)")
+                    print("⚠️ \(name): Writing failed – \(error)")
                 }
             }
         }
@@ -134,13 +134,6 @@ enum ScreenshotExporter {
         let written = exportAll(reveal: false)
         print("📸 \(written.count) Screenshots in \(directory.path(percentEncoded: false))")
         NSApp.terminate(nil)
-    }
-}
-
-@MainActor
-final class ScreenshotLaunchDelegate: NSObject, NSApplicationDelegate {
-    func applicationDidFinishLaunching(_ notification: Notification) {
-        ScreenshotExporter.runIfLaunchedForExport()
     }
 }
 #endif

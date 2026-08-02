@@ -10,7 +10,13 @@ import SwiftUI
 struct TokenRowContent: View {
     let presentation: TokenPresentation
     var showsCopiedIndicator: Bool = false
+    var hidesCode: Bool = false
     var accent: Color = .accentColor
+
+    private var displayedCode: String {
+        guard hidesCode else { return presentation.formattedCode }
+        return String(presentation.formattedCode.map { $0 == " " ? " " : "•" })
+    }
 
     var body: some View {
         HStack(spacing: 16) {
@@ -24,7 +30,7 @@ struct TokenRowContent: View {
 
             Spacer()
 
-            Text(presentation.formattedCode)
+            Text(displayedCode)
                 .font(.system(.title2, design: .monospaced, weight: .medium))
                 .monospacedDigit()
                 .contentTransition(.numericText())
@@ -53,17 +59,25 @@ struct TokenRowContent: View {
 
 struct TokenRowView: View {
     let token: OTPToken
+
+    @Environment(AppSettings.self) private var settings
     @State private var copied = false
+    @State private var isHovered = false
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1.0)) { context in
             let presentation = TokenPresentation(token: token, at: context.date)
 
-            TokenRowContent(presentation: presentation, showsCopiedIndicator: copied)
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    copyCode(presentation.code)
-                }
+            TokenRowContent(
+                presentation: presentation,
+                showsCopiedIndicator: copied,
+                hidesCode: settings.hidesCodes && !isHovered
+            )
+            .contentShape(Rectangle())
+            .onHover { isHovered = $0 }
+            .onTapGesture {
+                copyCode(presentation.code)
+            }
         }
     }
 
@@ -85,4 +99,5 @@ struct TokenRowView: View {
 
 #Preview {
     TokenRowView(token: OTPToken(issuer: "Github", account: "davidriegel", secret: Data()))
+        .environment(AppSettings.shared)
 }

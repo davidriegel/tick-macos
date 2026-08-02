@@ -8,19 +8,62 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @State private var startOnLaunch: Bool = true
+    @Environment(AppSettings.self) private var settings
+
     var body: some View {
-        Text(.settingsviewTitle)
-            .font(.headline)
-        VStack(spacing: 20) {
-            Toggle(isOn: $startOnLaunch) {
-                Text(.settingsviewStartOnLaunch)
+        @Bindable var settings = settings
+
+        Form {
+            Section {
+                Toggle(isOn: $settings.startsAtLogin) {
+                    Text(.settingsviewStartOnLaunch)
+                }
+
+                if settings.loginItemNeedsApproval {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(.settingsviewLoginApprovalHint)
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+
+                        Spacer()
+
+                        Button(.settingsviewOpenLoginItems) {
+                            settings.openLoginItemSettings()
+                        }
+                    }
+                }
+
+                if settings.loginItemFailed {
+                    Text(.settingsviewLoginItemFailed)
+                        .font(.callout)
+                        .foregroundStyle(.red)
+                }
+
+                Toggle(isOn: $settings.showsDockIcon) {
+                    Text(.settingsviewShowDockIcon)
+                }
+            } header: {
+                Text(.settingsviewSectionGeneral)
             }
-            .toggleStyle(.switch)
+
+            Section {
+                Toggle(isOn: $settings.hidesCodes) {
+                    Text(.settingsviewHideCodes)
+                }
+            } header: {
+                Text(.settingsviewSectionPrivacy)
+            }
+        }
+        .formStyle(.grouped)
+        .frame(width: 460)
+        .navigationTitle(Text(.settingsviewTitle))
+        .onAppear {
+            settings.refreshLoginItemStatus()
         }
     }
 }
 
 #Preview {
     SettingsView()
+        .environment(AppSettings.shared)
 }

@@ -10,15 +10,13 @@ import SwiftUI
 @main
 struct TickApp: App {
     @State private var tokenStore = TokenStore()
-
-    #if DEBUG
-    @NSApplicationDelegateAdaptor(ScreenshotLaunchDelegate.self) private var screenshotDelegate
-    #endif
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
         Window("Tick", id: "main") {
             TokenListView()
                 .environment(tokenStore)
+                .environment(AppSettings.shared)
                 .frame(
                     minWidth: TokenListView.windowSize.width,
                     minHeight: TokenListView.windowSize.height
@@ -46,9 +44,15 @@ struct TickApp: App {
         #endif
         }
 
+        Settings {
+            SettingsView()
+                .environment(AppSettings.shared)
+        }
+
         MenuBarExtra("Tick", systemImage: "lock.shield.fill") {
             MenuBarView()
                 .environment(tokenStore)
+                .environment(AppSettings.shared)
         }
         .menuBarExtraStyle(.window)
     }

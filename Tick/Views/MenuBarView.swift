@@ -23,8 +23,10 @@ struct MenuBarView: View {
             }
         } footer: {
             MenuBarFooter(
-                onOpen: openMainWindow,
-                onQuit: { NSApp.terminate(nil) }
+                actions: .init(
+                    open: openMainWindow,
+                    quit: { NSApp.terminate(nil) }
+                )
             )
         }
     }
@@ -113,13 +115,17 @@ struct MenuBarTokenList<Item: Identifiable, Row: View>: View {
 // MARK: - Footer
 
 struct MenuBarFooter: View {
-    var onOpen: (() -> Void)?
-    var onQuit: (() -> Void)?
+    struct Actions {
+        let open: () -> Void
+        let quit: () -> Void
+    }
+
+    var actions: Actions?
 
     var body: some View {
-        HStack {
-            if let onOpen {
-                Button(action: onOpen) { openLabel }
+        HStack(spacing: 12) {
+            if let actions {
+                Button(action: actions.open) { openLabel }
                     .buttonStyle(.borderless)
             } else {
                 openLabel
@@ -127,8 +133,16 @@ struct MenuBarFooter: View {
 
             Spacer()
 
-            if let onQuit {
-                Button(action: onQuit) { quitLabel }
+            if actions != nil {
+                SettingsLink { settingsLabel }
+                    .buttonStyle(.borderless)
+                    .help(Text(.menubarviewSettings))
+            } else {
+                settingsLabel
+            }
+
+            if let actions {
+                Button(action: actions.quit) { quitLabel }
                     .buttonStyle(.borderless)
                     .keyboardShortcut("q", modifiers: .command)
             } else {
@@ -139,6 +153,10 @@ struct MenuBarFooter: View {
 
     private var openLabel: some View {
         Label(.menubarviewOpen, systemImage: "macwindow")
+    }
+
+    private var settingsLabel: some View {
+        Image(systemName: "gearshape")
     }
 
     private var quitLabel: some View {

@@ -168,4 +168,5 @@ struct TokenListView: View {
 #Preview() {
     TokenListView()
         .environment(TokenStore())
+        .environment(AppSettings.shared)
 }
