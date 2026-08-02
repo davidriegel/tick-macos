@@ -11,6 +11,7 @@ import SwiftUI
 struct MenuBarView: View {
     @Environment(TokenStore.self) private var tokenStore
     @Environment(\.openWindow) private var openWindow
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         MenuBarContent {
@@ -25,6 +26,7 @@ struct MenuBarView: View {
             MenuBarFooter(
                 actions: .init(
                     open: openMainWindow,
+                    settings: openSettingsWindow,
                     quit: { NSApp.terminate(nil) }
                 )
             )
@@ -36,6 +38,23 @@ struct MenuBarView: View {
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
             guard let window = NSApp.windows.first(where: { $0.title == "Tick" }) else { return }
+
+            window.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
+
+            NSApp.activate(ignoringOtherApps: true)
+            window.makeKeyAndOrderFront(nil)
+            window.orderFrontRegardless()
+        }
+    }
+
+    private func openSettingsWindow() {
+        NSApp.activate(ignoringOtherApps: true)
+        openSettings()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            guard let window = NSApp.windows.first(where: {
+                $0.identifier?.rawValue.contains("Settings") == true
+            }) else { return }
 
             window.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
 
@@ -117,6 +136,7 @@ struct MenuBarTokenList<Item: Identifiable, Row: View>: View {
 struct MenuBarFooter: View {
     struct Actions {
         let open: () -> Void
+        let settings: () -> Void
         let quit: () -> Void
     }
 
@@ -133,8 +153,8 @@ struct MenuBarFooter: View {
 
             Spacer()
 
-            if actions != nil {
-                SettingsLink { settingsLabel }
+            if let actions {
+                Button(action: actions.settings) { settingsLabel }
                     .buttonStyle(.borderless)
                     .help(Text(.menubarviewSettings))
             } else {
